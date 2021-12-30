@@ -1,9 +1,9 @@
 # Following https://git.marvid.fr/scolobb/nix-GINsim/src/branch/master/ginsim.nix
 {pkgs}: 
 pkgs.stdenv.mkDerivation rec {
-  name = "${packageName}";
+  name = "prometheus-proxy";
   version = "1.11.0";
-  jre = pkgs.jre;
+  jre = pkgs.jre_headless;
 
   src = pkgs.fetchurl {
     url = "https://github.com/pambrose/prometheus-proxy/releases/download/${version}/prometheus-proxy.jar";
@@ -20,5 +20,5 @@ pkgs.stdenv.mkDerivation rec {
             makeWrapper ${jre}/bin/java $out/bin/prometheus-proxy \
             --add-flags "-jar $out/share/java/${name}-${version}.jar" \
     '';
-  };
+}
 

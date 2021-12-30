@@ -1,11 +1,12 @@
 # See https://nixos.wiki/wiki/Module
 {config, pkgs, lib, ...}: 
-let cfg = config.services.prometheusProxy;
+let cfg = config.services.prometheus-proxy;
+    prometheus-proxy = import ./prometheus-proxy.nix { inherit pkgs; };
 in
   with lib;
   {
     options = {
-      services.prometheusProxy = {
+      services.prometheus-proxy = {
         enable = mkOption {
           default = false;
           type = with types; bool;
@@ -25,17 +26,18 @@ in
     };
 
     config = lib.mkIf cfg.enable {
-      systemd.services.prometheusProxy = {
+      systemd.services.prometheus-proxy = {
         wantedBy = [ "multi-user.target" ]; 
         after = [ "network.target" ];
         description = "Start prometheus-proxy";
         serviceConfig = {
           Type = "exec";
          # User = "${cfg.user}";
-         ExecStart = ''${pkgs.prometheus-proxy}/bin/prometheus-proxy -p ${cfg.port}'';         
+         ExecStart = ''${prometheus-proxy}/bin/prometheus-proxy -p ${toString cfg.port}'';         
        };
      };
 
      #environment.systemPackages = [ pkgs.screen ];
    };
+
  }

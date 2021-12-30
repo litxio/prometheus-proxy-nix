@@ -5,6 +5,7 @@
 
   outputs = { self, nixpkgs, flake-utils }:
 
+    # Package outputs: one for each default system
     (flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
           packageName = "prometheus-proxy";
@@ -12,16 +13,19 @@
       {
         packages.prometheus-proxy = import ./prometheus-proxy.nix { inherit pkgs; };
         defaultPackage = self.packages.${system}.${packageName};
-      })) 
-      //
-      {
-        nixosModules.prometheusProxy = {
-          imports = [./nixos-module.nix];
-          nixpkgs.overlays = [
-            (final: prev: {
-              prometheus-proxy = self.packages.x86_64-linux.prometheus-proxy;
-            })
-          ];
-        };
+      }
+    ))
+    //
+    # Additional outputs
+    {
+      # nixOS module output
+      nixosModules.prometheus-proxy = {
+        imports = [./nixos-module.nix];
       };
+
+      # Overlay
+      overlay = final: prev: {
+          prometheus-proxy = self.packages.x86_64-linux.prometheus-proxy;
+        };
+    };
   }
